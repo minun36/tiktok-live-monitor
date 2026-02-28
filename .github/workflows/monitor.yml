@@ -1,0 +1,50 @@
+name: TikTok Live Monitor
+
+on:
+  schedule:
+    # 5分ごとに実行（GitHub Actions の cron 最小間隔）
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    # 手動実行も可能（テスト時に便利）
+
+permissions:
+  contents: write  # state.json を git commit & push するために必要
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4  # 5分スケジュールより短くして二重実行を防止
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run TikTok Live Monitor
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TIKTOK_USERNAMES: ${{ secrets.TIKTOK_USERNAMES }}
+        run: python monitor.py
+
+      - name: Commit and push state changes
+        run: |
+          git config --local user.name  "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          # 変更がある場合のみコミット
+          if git diff --staged --quiet; then
+            echo "state.json に変更なし。コミットをスキップします。"
+          else
+            git commit -m "chore: update live state [skip ci]"
+            git push
+          fi
