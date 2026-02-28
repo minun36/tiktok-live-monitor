@@ -28,19 +28,19 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
-        run: pip install -r tiktok-bot/requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Run TikTok Live Monitor
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           TIKTOK_USERNAMES: ${{ vars.TIKTOK_USERNAMES }}
-        run: python tiktok-bot/monitor.py
+        run: python monitor.py
 
       - name: Commit and push state changes
         run: |
           git config --local user.name  "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git add tiktok-bot/state.json
+          git add state.json
           # 変更がある場合のみコミット
           if git diff --staged --quiet; then
             echo "state.json に変更なし。コミットをスキップします。"
