@@ -33,7 +33,7 @@ jobs:
       - name: Run TikTok Live Monitor
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          TIKTOK_USERNAMES: ${{ secrets.TIKTOK_USERNAMES }}
+          TIKTOK_USERNAMES: ${{ vars.TIKTOK_USERNAMES }}
         run: python monitor.py
 
       - name: Commit and push state changes
